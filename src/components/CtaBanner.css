@@ -1,0 +1,23 @@
+.cta-banner {
+  background: linear-gradient(120deg, var(--color-navy) 0%, #1c4a7d 100%);
+  padding: 60px 0;
+}
+
+.cta-banner__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.cta-banner h2 {
+  color: #fff;
+  font-size: 1.7rem;
+  margin-bottom: 8px;
+}
+
+.cta-banner p {
+  color: rgba(255, 255, 255, 0.78);
+  margin: 0;
+}
