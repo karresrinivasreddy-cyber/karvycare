@@ -31,16 +31,9 @@ git push -u origin main
 
 ---
 
-## 2. Set up EmailJS (so the contact form can actually send email)
+## 2. Contact form (Web3Forms)
 
-1. Go to https://www.emailjs.com and create a free account (200 emails/month free).
-2. **Email Services** → Add a new service → connect the inbox that should receive enquiries (e.g. `info@karvicare.com.au`, or a Gmail account that forwards to it). Note the **Service ID**.
-3. **Email Templates** → create a new template. Use these merge fields in the template body: `{{from_name}}`, `{{reply_to}}`, `{{phone}}`, `{{enquiry_type}}`, `{{message}}`. Set the "To email" field to `{{to_email}}`. Note the **Template ID**.
-4. **Account** → **General** → copy your **Public Key**.
-
-You now have three values: `VITE_EMAILJS_SERVICE_ID`, `VITE_EMAILJS_TEMPLATE_ID`, `VITE_EMAILJS_PUBLIC_KEY`.
-
-> These are compiled into the site at **build time** (Vite env vars), so they must be added as GitHub Actions secrets (step 4 below) — not just Azure "Application settings", which only affect server-side/API code.
+The contact form posts to https://api.web3forms.com/submit using a public access key hardcoded in `src/components/ContactForm.jsx`. The key was created for `info@karvicare.com.au` at https://web3forms.com — no account, secrets, or build configuration needed. Email delivery requires the domain's Google Workspace MX records to be present in DNS.
 
 ---
 
@@ -64,26 +57,14 @@ Azure will automatically commit a GitHub Actions workflow file (`.github/workflo
 
 ---
 
-## 4. Add the EmailJS secrets to the build
+## 4. Build secrets
 
-Because the workflow Azure generated builds the app on GitHub's servers, the `VITE_EMAILJS_*` values need to be available there:
-
-1. In your GitHub repo → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**. Add:
-   - `VITE_EMAILJS_SERVICE_ID`
-   - `VITE_EMAILJS_TEMPLATE_ID`
-   - `VITE_EMAILJS_PUBLIC_KEY`
-   - `VITE_CONTACT_EMAIL` (e.g. `info@karvicare.com.au`)
-2. Open the auto-generated workflow file Azure committed (`.github/workflows/azure-static-web-apps-*.yml`) and add an `env:` block to the build step so those secrets get passed through, e.g.:
+None required — the Web3Forms access key is public and shipped with the client code. The auto-generated Azure workflow needs no `env:` additions.
 
 ```yaml
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
-        env:
-          VITE_EMAILJS_SERVICE_ID: ${{ secrets.VITE_EMAILJS_SERVICE_ID }}
-          VITE_EMAILJS_TEMPLATE_ID: ${{ secrets.VITE_EMAILJS_TEMPLATE_ID }}
-          VITE_EMAILJS_PUBLIC_KEY: ${{ secrets.VITE_EMAILJS_PUBLIC_KEY }}
-          VITE_CONTACT_EMAIL: ${{ secrets.VITE_CONTACT_EMAIL }}
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_... }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}

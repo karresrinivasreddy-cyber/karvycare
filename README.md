@@ -36,22 +36,11 @@ npm run build   # outputs to dist/
 npm run preview # preview the production build locally
 ```
 
-## Contact Form Setup (required before the form will actually send email)
+## Contact Form
 
-The contact form uses [EmailJS](https://www.emailjs.com) so it can send email without a backend server. Until it's configured, the form still validates and displays a friendly "not set up yet" message instead of failing silently.
+The contact form uses [Web3Forms](https://web3forms.com) (free, 250 submissions/month) so it can send email without a backend server. Submissions are delivered to `info@karvicare.com.au`.
 
-1. Create a free EmailJS account and an Email Service (e.g. connect your Gmail/Outlook).
-2. Create an Email Template with these variables: `from_name`, `reply_to`, `phone`, `enquiry_type`, `message`, `to_email`.
-3. Copy `.env.example` to `.env.local` and fill in:
-   ```
-   VITE_EMAILJS_SERVICE_ID=service_xxxxxxx
-   VITE_EMAILJS_TEMPLATE_ID=template_xxxxxxx
-   VITE_EMAILJS_PUBLIC_KEY=xxxxxxxxxxxxxxx
-   VITE_CONTACT_EMAIL=info@karvicare.com.au
-   ```
-4. Restart `npm run dev` — the form will now send real emails.
-
-**Important:** these are Vite build-time variables, so when deploying they must be set as build secrets (see [DEPLOYMENT.md](./DEPLOYMENT.md)), not just as Azure runtime app settings.
+The public access key is hardcoded in `src/components/ContactForm.jsx` — Web3Forms access keys are designed to be exposed in client-side code. No env vars or build secrets are required. To change the destination inbox, create a new access key for the new address at web3forms.com and swap it in.
 
 ## Editing Content
 

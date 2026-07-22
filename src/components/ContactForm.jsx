@@ -1,14 +1,10 @@
 import { useRef, useState } from 'react'
-import emailjs from '@emailjs/browser'
 import Icon from './Icon.jsx'
 import './ContactForm.css'
 
-const SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID
-const TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID
-const PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+// Web3Forms access key — safe to expose in client-side code.
+const WEB3FORMS_ACCESS_KEY = '2879e199-4a31-4c72-be89-987d3382198d'
 const CONTACT_EMAIL = import.meta.env.VITE_CONTACT_EMAIL || 'info@karvicare.com.au'
-
-const isConfigured = Boolean(SERVICE_ID && TEMPLATE_ID && PUBLIC_KEY)
 
 const ENQUIRY_TYPES = [
   'General Enquiry',
@@ -32,21 +28,29 @@ function ContactForm() {
       return
     }
 
-    if (!isConfigured) {
-      setStatus('error')
-      setErrorMsg(
-        'The contact form is not fully set up yet. Please email us directly while we finish configuration.'
-      )
-      return
-    }
-
     setStatus('sending')
     setErrorMsg('')
 
+    const form = formRef.current
     try {
-      await emailjs.sendForm(SERVICE_ID, TEMPLATE_ID, formRef.current, { publicKey: PUBLIC_KEY })
+      const res = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({
+          access_key: WEB3FORMS_ACCESS_KEY,
+          subject: `New enquiry from karvicare.com.au — ${form.enquiry_type.value}`,
+          from_name: 'Karvi Care Website',
+          name: form.from_name.value,
+          email: form.reply_to.value,
+          phone: form.phone.value,
+          enquiry_type: form.enquiry_type.value,
+          message: form.message.value,
+        }),
+      })
+      const data = await res.json()
+      if (!data.success) throw new Error(data.message)
       setStatus('success')
-      formRef.current.reset()
+      form.reset()
     } catch {
       setStatus('error')
       setErrorMsg('Something went wrong sending your message. Please try again, or email us directly.')
@@ -107,8 +111,6 @@ function ContactForm() {
         <label htmlFor="message">Message *</label>
         <textarea id="message" name="message" rows={5} required placeholder="Tell us a little about your support needs or NDIS plan..." />
       </div>
-
-      <input type="hidden" name="to_email" value={CONTACT_EMAIL} />
 
       {status === 'error' && <p className="contact-form__error">{errorMsg}</p>}
 
